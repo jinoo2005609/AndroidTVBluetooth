@@ -41,7 +41,13 @@
     <string name="startup_volume_set">Startup headphone volume set to %1$d%%</string>
     <string name="startup_volume_disabled_toast">Startup headphone volume disabled</string>
 
+    <!-- Mobile Quick Settings & Widget -->
+    <string name="tile_label">BT Quick Connect</string>
+    <string name="widget_name">Bluetooth Controller</string>
+    <string name="widget_description">1-click Bluetooth connect toggle widget</string>
+
     <string name="adb_usage_instructions">
+
 
         To connect or disconnect a device via ADB, use the following commands.
         \n\nTo connect, replace "Headphones_Name" with the exact name of your paired Bluetooth device:
