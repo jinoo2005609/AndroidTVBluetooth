@@ -17,6 +17,23 @@
     <string name="disconnect_device_description">Disconnect %1$s</string>
     <string name="unknown_device">Unknown Device</string>
 
+    <!-- Auto-Connect and Default Device -->
+    <string name="autoconnect_title">Auto-Connect on Launch</string>
+    <string name="autoconnect_desc_target">Target: %1$s</string>
+    <string name="autoconnect_desc_recent">Target: Most Recent Device</string>
+    <string name="autoconnect_desc_disabled">Disabled (Manual connect)</string>
+    <string name="tag_default">DEFAULT</string>
+    <string name="set_as_default">Set as Default</string>
+    <string name="clear_default">Clear Default</string>
+    <string name="default_device_set">%1$s set as default auto-connect device</string>
+    <string name="default_device_cleared">Default auto-connect device cleared</string>
+
+    <!-- Quick Connect -->
+    <string name="quick_connect_title">Quick Connect Bluetooth</string>
+    <string name="quick_connect_connecting">Connecting to %1$s…</string>
+    <string name="quick_connect_no_device">No paired Bluetooth device found</string>
+    <string name="quick_connect_already_connected">%1$s is already connected</string>
+
     <string name="adb_usage_instructions">
         To connect or disconnect a device via ADB, use the following commands.
         \n\nTo connect, replace "Headphones_Name" with the exact name of your paired Bluetooth device:
@@ -29,3 +46,4 @@
         \n    -e name "Headphones_Name"
     </string>
 </resources>
+

@@ -29,6 +29,20 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".QuickConnectActivity"
+            android:exported="true"
+            android:label="@string/quick_connect_title"
+            android:theme="@style/Theme.AndroidTVBluetooth.QuickConnect"
+            android:excludeFromRecents="true"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="com.saihgupr.btcontrol.ACTION_QUICK_CONNECT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+
         <receiver
             android:name=".BluetoothControlReceiver"
             android:enabled="true"

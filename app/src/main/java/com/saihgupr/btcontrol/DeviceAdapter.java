@@ -27,6 +27,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     public interface OnDeviceActionListener {
         void onConnect(BluetoothDevice device);
         void onDisconnect(BluetoothDevice device);
+        void onToggleDefault(BluetoothDevice device);
     }
 
     public DeviceAdapter(BluetoothManagerHelper btHelper, OnDeviceActionListener listener) {
@@ -66,6 +67,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         holder.nameText.setText(deviceName);
         holder.addressText.setText(device.getAddress());
 
+        String defaultAddress = DevicePrefs.getDefaultDeviceAddress(context);
+        boolean isDefault = (defaultAddress != null && defaultAddress.equalsIgnoreCase(device.getAddress()));
+        holder.defaultTag.setVisibility(isDefault ? View.VISIBLE : View.GONE);
+
         int state = btHelper.getConnectionState(device);
         boolean isConnected = (state == BluetoothProfile.STATE_CONNECTED);
         boolean isConnecting = (state == BluetoothProfile.STATE_CONNECTING);
@@ -91,15 +96,18 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         holder.disconnectButton.setContentDescription(context.getString(R.string.disconnect_device_description, deviceName));
 
         // Set content description on the card itself for TalkBack accessibility
-        String actionDescription;
-        if (isConnected) {
-            actionDescription = context.getString(R.string.disconnect_device_description, deviceName);
-        } else if (isConnecting) {
-            actionDescription = context.getString(R.string.status_connecting) + " " + deviceName;
-        } else {
-            actionDescription = context.getString(R.string.connect_device_description, deviceName);
+        StringBuilder actionDescription = new StringBuilder();
+        if (isDefault) {
+            actionDescription.append(context.getString(R.string.tag_default)).append(" ");
         }
-        holder.itemView.setContentDescription(actionDescription);
+        if (isConnected) {
+            actionDescription.append(context.getString(R.string.disconnect_device_description, deviceName));
+        } else if (isConnecting) {
+            actionDescription.append(context.getString(R.string.status_connecting)).append(" ").append(deviceName);
+        } else {
+            actionDescription.append(context.getString(R.string.connect_device_description, deviceName));
+        }
+        holder.itemView.setContentDescription(actionDescription.toString());
 
         // Make the entire card clickable for better TV navigation
         holder.itemView.setFocusable(true);
@@ -112,6 +120,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                 android.util.Log.d(TAG, "Card clicked (Connect): " + device.getName());
                 if (listener != null) listener.onConnect(device);
             }
+        });
+
+        // Long-click to set or clear default device
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onToggleDefault(device);
+                return true;
+            }
+            return false;
         });
         
         // Remove individual button click listeners to avoid conflicts
@@ -132,6 +149,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     static class DeviceViewHolder extends RecyclerView.ViewHolder {
         TextView nameText;
         TextView addressText;
+        TextView defaultTag;
         TextView statusTag;
         MaterialButton connectButton;
         MaterialButton disconnectButton;
@@ -140,9 +158,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
             super(itemView);
             nameText = itemView.findViewById(R.id.device_name);
             addressText = itemView.findViewById(R.id.device_address);
+            defaultTag = itemView.findViewById(R.id.default_tag);
             statusTag = itemView.findViewById(R.id.status_tag);
             connectButton = itemView.findViewById(R.id.btn_connect);
             disconnectButton = itemView.findViewById(R.id.btn_disconnect);
         }
     }
 }
+

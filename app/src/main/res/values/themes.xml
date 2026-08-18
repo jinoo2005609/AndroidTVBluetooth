@@ -21,4 +21,15 @@
         <item name="textAppearanceHeadline1">@style/TextAppearance.MaterialComponents.Headline1</item>
         <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
     </style>
+
+    <!-- Translucent QuickConnect Theme for instant background execution -->
+    <style name="Theme.AndroidTVBluetooth.QuickConnect" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
+

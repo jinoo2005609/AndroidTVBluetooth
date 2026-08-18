@@ -7,6 +7,8 @@ A lightweight utility for Android TV and Android phones that gives you a **1-cli
 ## Features
 
 - **1-Click Connect:** Simple UI to instantly toggle connections from your TV.
+- **Auto-Connect on Launch:** Automatically connect to your designated default or most recent Bluetooth device upon launching the app.
+- **Remote Button Mapping (QuickConnect):** Map any button on your Shield/TV remote (via Button Mapper) directly to `QuickConnectActivity` to connect your headphones in the background without opening the main UI.
 - **ADB Automation:** Trigger connections/disconnections via terminal or automation scripts (Tasker, Home Assistant).
 - **Recent Sorting:** Automatically sorts paired devices by most recently used.
 - **Universal Compatibility:** Works on Android TV and Android phones (Android 8.0+).
@@ -15,9 +17,22 @@ A lightweight utility for Android TV and Android phones that gives you a **1-cli
 ## Usage
 
 ### UI Method
-Simply launch the **AndroidTV Bluetooth Controller** app. All your paired devices will appear in a list. Click any device to connect or disconnect. Your most recently used devices will automatically stay at the top.
+Simply launch the **AndroidTV Bluetooth Controller** app.
+- Click any device to connect or disconnect.
+- **Set as Default:** Long-click any device card to mark it as the default auto-connect device (indicated by a `★ DEFAULT` badge).
+- **Auto-Connect Toggle:** Use the left panel card to enable or disable automatic connection on startup.
+
+### Quick Connect (Remote Button Mapping)
+You can map a button on your Shield or Android TV remote using **Button Mapper**:
+- **Option 1 (App/Activity):** In Button Mapper, select **Applications > Quick Connect Bluetooth** (`com.saihgupr.btcontrol/.QuickConnectActivity`).
+- **Option 2 (ADB / Intent Action):**
+  ```bash
+  adb shell am start -n com.saihgupr.btcontrol/.QuickConnectActivity
+  ```
+  *This instantly connects to your default/recent device in the background and closes cleanly without interrupting your playback.*
 
 ### ADB Method (Automation)
+
 Connect or disconnect your Bluetooth devices by sending broadcast intents. This is perfect for mapping to remote buttons (via Button Mapper) or integrating into "Movie Mode" scenes.
 
 ### Connect a Device
