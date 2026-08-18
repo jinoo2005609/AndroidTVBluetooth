@@ -6,30 +6,38 @@ A lightweight utility for Android TV and Android phones that gives you a **1-cli
 
 ## Features
 
-- **1-Click Connect:** Simple UI to instantly toggle connections from your TV.
+- **1-Click Connect:** Simple UI to instantly toggle connections from your TV or Phone.
 - **Auto-Connect on Launch:** Automatically connect to your designated default or most recent Bluetooth device upon launching the app.
-- **Remote Button Mapping (QuickConnect):** Map any button on your Shield/TV remote (via Button Mapper) directly to `QuickConnectActivity` to connect your headphones in the background without opening the main UI.
+- **Battery Percentage Display:** Real-time battery indicator on device cards with dynamic health status color coding.
+- **Safe Startup Volume:** Automatically set headphone media volume to a comfortable level (e.g. 30%, 40%, 50%) upon connection to protect your hearing.
+- **Remote Button Mapping (QuickConnect):** Map any button on your Shield/TV remote (via Button Mapper) directly to `QuickConnectActivity` to connect headphones in the background without opening the main UI.
+- **Mobile Quick Settings Tile & Widget:** Pull down the notification shade or tap a 1x1 Home Screen widget to toggle connection on Android phones and tablets.
 - **ADB Automation:** Trigger connections/disconnections via terminal or automation scripts (Tasker, Home Assistant).
 - **Recent Sorting:** Automatically sorts paired devices by most recently used.
-- **Universal Compatibility:** Works on Android TV and Android phones (Android 8.0+).
+- **Universal Compatibility:** Works seamlessly across Android TV, Google TV, and Android mobile (Android 8.0+).
 - **Low Overhead:** Minimal impact on system resources and stays ready across restarts.
 
 ## Usage
 
 ### UI Method
-Simply launch the **AndroidTV Bluetooth Controller** app.
-- Click any device to connect or disconnect.
+Simply launch the **AndroidTV Bluetooth Controller** app:
+- **Connect / Disconnect:** Click any paired device card.
 - **Set as Default:** Long-click any device card to mark it as the default auto-connect device (indicated by a `★ DEFAULT` badge).
 - **Auto-Connect Toggle:** Use the left panel card to enable or disable automatic connection on startup.
+- **Safe Startup Volume:** Click the volume card on the left panel to cycle volume presets (`OFF`, `30%`, `40%`, `50%`, `60%`, `70%`, `80%`).
 
 ### Quick Connect (Remote Button Mapping)
 You can map a button on your Shield or Android TV remote using **Button Mapper**:
-- **Option 1 (App/Activity):** In Button Mapper, select **Applications > Quick Connect Bluetooth** (`com.saihgupr.btcontrol/.QuickConnectActivity`).
+- **Option 1 (App / Activity):** In Button Mapper, select **Applications > Quick Connect Bluetooth** (`com.saihgupr.btcontrol/.QuickConnectActivity`).
 - **Option 2 (ADB / Intent Action):**
   ```bash
   adb shell am start -n com.saihgupr.btcontrol/.QuickConnectActivity
   ```
   *This instantly connects to your default/recent device in the background and closes cleanly without interrupting your playback.*
+
+### Mobile Quick Settings & Widget
+- **Quick Settings Tile:** Edit your Quick Settings shade on your phone and add the **BT Quick Connect** tile for 1-tap connection toggle and live battery status.
+- **Home Screen Widget:** Long-press your home screen, select Widgets, and add the **Bluetooth Controller** 1x1 widget.
 
 ### ADB Method (Automation)
 
@@ -59,6 +67,7 @@ adb shell am broadcast -a com.saihgupr.btcontrol.ACTION_DISCONNECT \
   -n com.saihgupr.btcontrol/.BluetoothControlReceiver \
   -e name "Your Device Name"
 ```
+
 
 ## Installation
 
