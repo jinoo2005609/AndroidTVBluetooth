@@ -171,6 +171,82 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Safe Startup Volume Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/volume_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@color/colorSurface"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/card_overlay"
+        android:focusable="true"
+        android:clickable="true"
+        app:layout_constraintTop_toBottomOf="@id/autoconnect_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/volume_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_volume"
+                android:importantForAccessibility="no"
+                app:tint="@color/colorSecondary" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/volume_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/startup_volume_title"
+                    android:textColor="@color/colorOnSurface"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/volume_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/startup_volume_desc_disabled"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/volume_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/version_pill_bg"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:text="OFF"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_vertical"

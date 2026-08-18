@@ -9,6 +9,8 @@ public class DevicePrefs {
     private static final String KEY_AUTO_CONNECT = "auto_connect_enabled";
     private static final String KEY_DEFAULT_DEVICE_ADDRESS = "default_device_address";
     private static final String KEY_DEFAULT_DEVICE_NAME = "default_device_name";
+    private static final String KEY_STARTUP_VOLUME_ENABLED = "startup_volume_enabled";
+    private static final String KEY_STARTUP_VOLUME_PERCENT = "startup_volume_percent";
 
     public static void updateLastUsed(Context context, String address) {
         if (address == null || context == null) return;
@@ -63,5 +65,45 @@ public class DevicePrefs {
                 .remove(KEY_DEFAULT_DEVICE_NAME)
                 .apply();
     }
+
+    public static boolean isStartupVolumeEnabled(Context context) {
+        if (context == null) return false;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_STARTUP_VOLUME_ENABLED, false);
+    }
+
+    public static void setStartupVolumeEnabled(Context context, boolean enabled) {
+        if (context == null) return;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_STARTUP_VOLUME_ENABLED, enabled).apply();
+    }
+
+    public static int getStartupVolumePercent(Context context) {
+        if (context == null) return 40;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(KEY_STARTUP_VOLUME_PERCENT, 40);
+    }
+
+    public static void setStartupVolumePercent(Context context, int percent) {
+        if (context == null) return;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(KEY_STARTUP_VOLUME_PERCENT, percent).apply();
+    }
+
+    public static void applyStartupVolume(Context context) {
+        if (context == null || !isStartupVolumeEnabled(context)) return;
+        try {
+            android.media.AudioManager audioManager = (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager != null) {
+                int maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC);
+                int percent = getStartupVolumePercent(context);
+                int targetVolume = Math.max(1, Math.round((percent / 100.0f) * maxVolume));
+                audioManager.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, targetVolume, 0);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("DevicePrefs", "Failed to apply startup volume", e);
+        }
+    }
 }
+
 

@@ -34,7 +34,15 @@
     <string name="quick_connect_no_device">No paired Bluetooth device found</string>
     <string name="quick_connect_already_connected">%1$s is already connected</string>
 
+    <!-- Safe Startup Volume -->
+    <string name="startup_volume_title">Safe Headphone Volume</string>
+    <string name="startup_volume_desc_enabled">Volume preset: %1$d%% on connect</string>
+    <string name="startup_volume_desc_disabled">Disabled (Keep previous volume)</string>
+    <string name="startup_volume_set">Startup headphone volume set to %1$d%%</string>
+    <string name="startup_volume_disabled_toast">Startup headphone volume disabled</string>
+
     <string name="adb_usage_instructions">
+
         To connect or disconnect a device via ADB, use the following commands.
         \n\nTo connect, replace "Headphones_Name" with the exact name of your paired Bluetooth device:
     </string>

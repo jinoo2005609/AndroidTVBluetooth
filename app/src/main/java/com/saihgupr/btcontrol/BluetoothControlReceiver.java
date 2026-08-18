@@ -48,8 +48,12 @@ public class BluetoothControlReceiver extends BroadcastReceiver {
 
         Runnable onComplete = () -> {
             Log.d(TAG, "Action completed, releasing PendingResult");
+            if (ACTION_CONNECT.equals(action)) {
+                DevicePrefs.applyStartupVolume(context.getApplicationContext());
+            }
             pendingResult.finish();
         };
+
 
         if (ACTION_CONNECT.equals(action)) {
             if (address != null) sHelper.connect(address, onComplete);

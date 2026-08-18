@@ -9,7 +9,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -37,15 +40,22 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     private MaterialCardView autoconnectCard;
     private TextView autoconnectSubtitle;
     private SwitchCompat autoconnectSwitch;
+    private MaterialCardView volumeCard;
+    private TextView volumeSubtitle;
+    private TextView volumeBadge;
     private RecyclerView devicesRecycler;
     private DeviceAdapter deviceAdapter;
     private BluetoothManagerHelper btHelper;
     private boolean hasAutoConnectedThisSession = false;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent != null ? intent.getAction() : null;
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                mainHandler.postDelayed(() -> DevicePrefs.applyStartupVolume(context), 1200);
+            }
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action) ||
                 BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) ||
                 BluetoothAdapter.ACTION_STATE_CHANGED.equals(action) ||
@@ -53,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
                 updateDeviceList();
                 updateStatus();
                 updateAutoConnectUI();
+                updateVolumeUI();
             }
         }
     };
@@ -68,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         autoconnectCard = findViewById(R.id.autoconnect_card);
         autoconnectSubtitle = findViewById(R.id.autoconnect_subtitle);
         autoconnectSwitch = findViewById(R.id.autoconnect_switch);
+        volumeCard = findViewById(R.id.volume_card);
+        volumeSubtitle = findViewById(R.id.volume_subtitle);
+        volumeBadge = findViewById(R.id.volume_badge);
         devicesRecycler = findViewById(R.id.devices_recycler);
 
         btHelper = new BluetoothManagerHelper(this);
@@ -97,11 +111,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         filter.addAction(ACTION_BATTERY_LEVEL_CHANGED);
         registerReceiver(mReceiver, filter);
 
-
         devicesRecycler.setLayoutManager(new LinearLayoutManager(this));
         devicesRecycler.setAdapter(deviceAdapter);
 
         setupAutoConnectCard();
+        setupVolumeCard();
     }
 
     private void setupAutoConnectCard() {
@@ -114,6 +128,59 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         });
 
         updateAutoConnectUI();
+    }
+
+    private void setupVolumeCard() {
+        if (volumeCard == null) return;
+
+        volumeCard.setOnClickListener(v -> cycleVolumeSetting());
+        updateVolumeUI();
+    }
+
+    private void cycleVolumeSetting() {
+        boolean isEnabled = DevicePrefs.isStartupVolumeEnabled(this);
+        int currentPercent = DevicePrefs.getStartupVolumePercent(this);
+
+        if (!isEnabled) {
+            DevicePrefs.setStartupVolumeEnabled(this, true);
+            DevicePrefs.setStartupVolumePercent(this, 30);
+            Toast.makeText(this, getString(R.string.startup_volume_set, 30), Toast.LENGTH_SHORT).show();
+        } else {
+            int nextPercent;
+            if (currentPercent < 40) nextPercent = 40;
+            else if (currentPercent < 50) nextPercent = 50;
+            else if (currentPercent < 60) nextPercent = 60;
+            else if (currentPercent < 70) nextPercent = 70;
+            else if (currentPercent < 80) nextPercent = 80;
+            else {
+                DevicePrefs.setStartupVolumeEnabled(this, false);
+                Toast.makeText(this, R.string.startup_volume_disabled_toast, Toast.LENGTH_SHORT).show();
+                updateVolumeUI();
+                return;
+            }
+            DevicePrefs.setStartupVolumePercent(this, nextPercent);
+            Toast.makeText(this, getString(R.string.startup_volume_set, nextPercent), Toast.LENGTH_SHORT).show();
+        }
+
+        updateVolumeUI();
+    }
+
+    private void updateVolumeUI() {
+        if (volumeSubtitle == null || volumeBadge == null) return;
+
+        boolean isEnabled = DevicePrefs.isStartupVolumeEnabled(this);
+        if (isEnabled) {
+            int percent = DevicePrefs.getStartupVolumePercent(this);
+            volumeSubtitle.setText(getString(R.string.startup_volume_desc_enabled, percent));
+            volumeSubtitle.setTextColor(ContextCompat.getColor(this, R.color.colorSecondary));
+            volumeBadge.setText(percent + "%");
+            volumeBadge.setTextColor(ContextCompat.getColor(this, R.color.colorSecondary));
+        } else {
+            volumeSubtitle.setText(R.string.startup_volume_desc_disabled);
+            volumeSubtitle.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
+            volumeBadge.setText("OFF");
+            volumeBadge.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
+        }
     }
 
     private void updateAutoConnectUI() {
@@ -137,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
             autoconnectSubtitle.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
         }
     }
+
 
     private void toggleDefaultDevice(BluetoothDevice device) {
         String currentDefault = DevicePrefs.getDefaultDeviceAddress(this);
@@ -212,7 +280,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         updateStatus();
         updateDeviceList();
         updateAutoConnectUI();
+        updateVolumeUI();
     }
+
 
     private void updateDeviceList() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();

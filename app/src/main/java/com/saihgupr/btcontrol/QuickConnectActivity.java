@@ -68,9 +68,11 @@ public class QuickConnectActivity extends AppCompatActivity {
 
         Toast.makeText(this, getString(R.string.quick_connect_connecting, displayName), Toast.LENGTH_SHORT).show();
         btHelper.connect(targetDevice.getAddress(), () -> {
+            DevicePrefs.applyStartupVolume(getApplicationContext());
             runOnUiThread(this::finishAndCleanUp);
         });
     }
+
 
     private BluetoothDevice resolveTargetDevice(BluetoothAdapter adapter, String explicitAddress, String explicitName) {
         try {
