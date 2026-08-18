@@ -22,8 +22,10 @@
 
     <!-- Status Colors -->
     <color name="status_ready">#32D74B</color> <!-- Green -->
+    <color name="status_warning">#FFD60A</color> <!-- Amber/Yellow -->
     <color name="status_disabled">#8E8E93</color> <!-- Gray -->
     <color name="status_error">#FF453A</color> <!-- Red -->
+
     
     <!-- Glass/Card Overlays -->
     <color name="card_overlay">#2C2C2E</color> <!-- Slightly lighter for borders -->

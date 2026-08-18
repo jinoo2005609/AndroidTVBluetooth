@@ -75,6 +75,23 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         boolean isConnected = (state == BluetoothProfile.STATE_CONNECTED);
         boolean isConnecting = (state == BluetoothProfile.STATE_CONNECTING);
 
+        int batteryLevel = btHelper.getBatteryLevel(device);
+        if (isConnected && batteryLevel >= 0) {
+            holder.batteryTag.setVisibility(View.VISIBLE);
+            holder.batteryTag.setText(batteryLevel + "%");
+            int batteryColor;
+            if (batteryLevel > 50) {
+                batteryColor = ContextCompat.getColor(context, R.color.status_ready);
+            } else if (batteryLevel > 20) {
+                batteryColor = ContextCompat.getColor(context, R.color.status_warning);
+            } else {
+                batteryColor = ContextCompat.getColor(context, R.color.status_error);
+            }
+            holder.batteryTag.setTextColor(batteryColor);
+        } else {
+            holder.batteryTag.setVisibility(View.GONE);
+        }
+
         if (isConnected) {
             holder.statusTag.setVisibility(View.VISIBLE);
             holder.statusTag.setText(R.string.status_connected);
@@ -102,6 +119,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         }
         if (isConnected) {
             actionDescription.append(context.getString(R.string.disconnect_device_description, deviceName));
+            if (batteryLevel >= 0) {
+                actionDescription.append(", ").append(batteryLevel).append(" percent battery");
+            }
         } else if (isConnecting) {
             actionDescription.append(context.getString(R.string.status_connecting)).append(" ").append(deviceName);
         } else {
@@ -151,6 +171,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         TextView addressText;
         TextView defaultTag;
         TextView statusTag;
+        TextView batteryTag;
         MaterialButton connectButton;
         MaterialButton disconnectButton;
 
@@ -160,9 +181,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
             addressText = itemView.findViewById(R.id.device_address);
             defaultTag = itemView.findViewById(R.id.default_tag);
             statusTag = itemView.findViewById(R.id.status_tag);
+            batteryTag = itemView.findViewById(R.id.battery_tag);
             connectButton = itemView.findViewById(R.id.btn_connect);
             disconnectButton = itemView.findViewById(R.id.btn_disconnect);
         }
     }
 }
+
 

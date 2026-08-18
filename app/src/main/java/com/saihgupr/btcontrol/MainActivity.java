@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
 
     private static final String TAG = "MainActivity";
     public static final String EXTRA_AUTO_CONNECT = "autoconnect";
+    public static final String ACTION_BATTERY_LEVEL_CHANGED = "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED";
 
     private ImageView statusIcon;
     private TextView statusTitle;
@@ -44,10 +45,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+            String action = intent != null ? intent.getAction() : null;
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action) ||
                 BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) ||
-                BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                BluetoothAdapter.ACTION_STATE_CHANGED.equals(action) ||
+                ACTION_BATTERY_LEVEL_CHANGED.equals(action)) {
                 updateDeviceList();
                 updateStatus();
                 updateAutoConnectUI();
@@ -92,7 +94,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(ACTION_BATTERY_LEVEL_CHANGED);
         registerReceiver(mReceiver, filter);
+
 
         devicesRecycler.setLayoutManager(new LinearLayoutManager(this));
         devicesRecycler.setAdapter(deviceAdapter);

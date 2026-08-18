@@ -232,6 +232,23 @@ public class BluetoothManagerHelper {
         }
     }
 
+    public int getBatteryLevel(BluetoothDevice device) {
+        if (!hasPermission() || device == null) return -1;
+        try {
+            Method method = device.getClass().getMethod("getBatteryLevel");
+            Object result = method.invoke(device);
+            if (result instanceof Integer) {
+                int level = (Integer) result;
+                // Android returns -1 (or BluetoothDevice.BATTERY_LEVEL_UNKNOWN) when level is unknown
+                return (level >= 0 && level <= 100) ? level : -1;
+            }
+        } catch (Exception e) {
+            // Not supported on this API level or device
+        }
+        return -1;
+    }
+
+
     private BluetoothDevice findBondedDeviceByName(String name) {
         if (!hasPermission()) {
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission");
