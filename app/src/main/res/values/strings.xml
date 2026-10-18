@@ -46,6 +46,8 @@
     <string name="scan_start_failed">Could not start Bluetooth scanning. Try again.</string>
     <string name="scan_not_supported">Bluetooth is not supported on this device</string>
     <string name="scan_permission_denied">Bluetooth scan and connect permissions are required</string>
+    <string name="permissions_required">Required permissions are missing</string>
+    <string name="permissions_required_settings">Required permissions are missing. Enable them in App info.</string>
     <string name="scan_again">Scan Again</string>
     <string name="cancel">Cancel</string>
     <string name="scan_paired_tag">PAIRED</string>
@@ -79,8 +81,8 @@
     <string name="instructions_header">ADB Usage:</string>
     <string name="adb_example">
         $ adb shell am broadcast \
-        \n    -a com.saihgupr.btcontrol.ACTION_CONNECT \
-        \n    -n com.saihgupr.btcontrol/.BluetoothControlReceiver \
+        \n    -a com.esh.btcontrol.ACTION_CONNECT \
+        \n    -n com.esh.btcontrol/.BluetoothControlReceiver \
         \n    -e name "Headphones_Name"
     </string>
 </resources>

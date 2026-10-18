@@ -30,10 +30,10 @@ Simply launch the **AndroidTV Bluetooth Controller** app:
 
 ### Quick Connect (Remote Button Mapping)
 You can map a button on your Shield or Android TV remote using **Button Mapper**:
-- **Option 1 (App / Activity):** In Button Mapper, select **Applications > Quick Connect Bluetooth** (`com.saihgupr.btcontrol/.QuickConnectActivity`).
+- **Option 1 (App / Activity):** In Button Mapper, select **Applications > Quick Connect Bluetooth** (`com.esh.btcontrol/.QuickConnectActivity`).
 - **Option 2 (ADB / Intent Action):**
   ```bash
-  adb shell am start -n com.saihgupr.btcontrol/.QuickConnectActivity
+  adb shell am start -n com.esh.btcontrol/.QuickConnectActivity
   ```
   *This instantly connects to your default/recent device in the background and closes cleanly without interrupting your playback.*
 
@@ -49,24 +49,24 @@ Connect or disconnect your Bluetooth devices by sending broadcast intents. This 
 
 **By Name (Recommended):**
 ```bash
-adb shell am broadcast -a com.saihgupr.btcontrol.ACTION_CONNECT \
-  -n com.saihgupr.btcontrol/.BluetoothControlReceiver \
+adb shell am broadcast -a com.esh.btcontrol.ACTION_CONNECT \
+  -n com.esh.btcontrol/.BluetoothControlReceiver \
   -e name "Your Device Name"
 ```
 *Note: Name matching is case-insensitive (e.g., "LE_WH-1000XM4").*
 
 **By MAC Address:**
 ```bash
-adb shell am broadcast -a com.saihgupr.btcontrol.ACTION_CONNECT \
-  -n com.saihgupr.btcontrol/.BluetoothControlReceiver \
+adb shell am broadcast -a com.esh.btcontrol.ACTION_CONNECT \
+  -n com.esh.btcontrol/.BluetoothControlReceiver \
   -e address "CC:98:8B:F4:97:BA"
 ```
 
 ### Disconnect a Device
 
 ```bash
-adb shell am broadcast -a com.saihgupr.btcontrol.ACTION_DISCONNECT \
-  -n com.saihgupr.btcontrol/.BluetoothControlReceiver \
+adb shell am broadcast -a com.esh.btcontrol.ACTION_DISCONNECT \
+  -n com.esh.btcontrol/.BluetoothControlReceiver \
   -e name "Your Device Name"
 ```
 
@@ -89,8 +89,8 @@ adb install -r path/to/AndroidTVBluetooth.apk
 ### 2. Grant Permissions
 **Option A: Via ADB**
 ```bash
-adb shell pm grant com.saihgupr.btcontrol android.permission.BLUETOOTH_CONNECT
-adb shell pm grant com.saihgupr.btcontrol android.permission.BLUETOOTH_SCAN
+adb shell pm grant com.esh.btcontrol android.permission.BLUETOOTH_CONNECT
+adb shell pm grant com.esh.btcontrol android.permission.BLUETOOTH_SCAN
 ```
 *The scan permission only exists on Android 12+; skip it on older versions.*
 
@@ -99,7 +99,9 @@ adb shell pm grant com.saihgupr.btcontrol android.permission.BLUETOOTH_SCAN
 2. Find **AndroidTV Bluetooth Controller**.
 3. Select **Permissions** and ensure **Nearby Devices** (Bluetooth) is allowed.
 
-On Android 11 and below, the **Location** permission is also required to scan for devices; on Android 10–11, Location services must be enabled as well. The app prompts for these when **Add Device** is used.
+On Android 11 and below, the **Location** permission is also required to scan for devices; on Android 10–11, Location services must be enabled as well.
+
+On launch, the app requests all required runtime permissions. If a permission has been permanently denied and can no longer be requested, the app opens the **App info** screen so it can be granted manually.
 
 ### 3. Initialize
 Launch the **AndroidTVBluetooth** app manually on your TV **one time** to move it out of the system's "stopped" state. You can close it immediately after.

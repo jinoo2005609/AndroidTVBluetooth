@@ -47,7 +47,7 @@
             android:excludeFromRecents="true"
             android:taskAffinity="">
             <intent-filter>
-                <action android:name="com.saihgupr.btcontrol.ACTION_QUICK_CONNECT" />
+                <action android:name="com.esh.btcontrol.ACTION_QUICK_CONNECT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -60,8 +60,8 @@
             android:permission="android.permission.DUMP">
             <!-- Restricted to DUMP permission (held by shell/root) to prevent other apps from triggering -->
             <intent-filter>
-                <action android:name="com.saihgupr.btcontrol.ACTION_CONNECT" />
-                <action android:name="com.saihgupr.btcontrol.ACTION_DISCONNECT" />
+                <action android:name="com.esh.btcontrol.ACTION_CONNECT" />
+                <action android:name="com.esh.btcontrol.ACTION_DISCONNECT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>

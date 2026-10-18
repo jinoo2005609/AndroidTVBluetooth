@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;

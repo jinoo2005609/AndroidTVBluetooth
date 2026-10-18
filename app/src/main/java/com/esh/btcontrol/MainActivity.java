@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -8,9 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +42,10 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements BluetoothManagerHelper.OnProfileProxyListener {
 
     private static final String TAG = "MainActivity";
-    private static final int REQUEST_PAIRING_PERMISSIONS = 2001;
+    private static final int REQUEST_REQUIRED_PERMISSIONS = 2001;
+    private static final String PERMISSION_PREFS = "permissions";
+    private static final String KEY_PERMANENTLY_DENIED_PREFIX = "permanently_denied_";
+    private static boolean sPermissionCheckDoneThisProcess = false;
     public static final String EXTRA_AUTO_CONNECT = "autoconnect";
     public static final String ACTION_BATTERY_LEVEL_CHANGED = "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED";
 
@@ -57,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     private DeviceAdapter deviceAdapter;
     private BluetoothManagerHelper btHelper;
     private DeviceScanDialog scanDialog;
+    private SharedPreferences permissionPrefs;
+    private boolean openScanAfterPermissionGranted = false;
     private boolean hasAutoConnectedThisSession = false;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         volumeSubtitle = findViewById(R.id.volume_subtitle);
         volumeBadge = findViewById(R.id.volume_badge);
         devicesRecycler = findViewById(R.id.devices_recycler);
+        permissionPrefs = getSharedPreferences(PERMISSION_PREFS, MODE_PRIVATE);
 
         btHelper = new BluetoothManagerHelper(this);
         deviceAdapter = new DeviceAdapter(btHelper, new DeviceAdapter.OnDeviceActionListener() {
@@ -130,40 +138,101 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         setupAutoConnectCard();
         setupVolumeCard();
         setupAddDeviceButton();
+
+        if (savedInstanceState == null || !sPermissionCheckDoneThisProcess) {
+            sPermissionCheckDoneThisProcess = true;
+            requestPermissionsIfNeeded(false);
+        }
     }
 
     private void setupAddDeviceButton() {
         MaterialButton addDeviceButton = findViewById(R.id.add_device_button);
         if (addDeviceButton != null) {
-            addDeviceButton.setOnClickListener(v -> requestPairingPermissionsAndScan());
+            addDeviceButton.setOnClickListener(v -> requestPermissionsIfNeeded(true));
         }
     }
 
-    private void requestPairingPermissionsAndScan() {
-        String[] missingPermissions = getMissingPairingPermissions();
-        if (missingPermissions.length > 0) {
-            ActivityCompat.requestPermissions(
-                    this, missingPermissions, REQUEST_PAIRING_PERMISSIONS);
+    private void requestPermissionsIfNeeded(boolean forScan) {
+        clearGrantedPermanentDenials();
+        String[] missingPermissions = getMissingRequiredPermissions();
+        if (missingPermissions.length == 0) {
+            openScanAfterPermissionGranted = false;
+            if (forScan) {
+                openScanDialogIfReady();
+            }
             return;
         }
-        openScanDialogIfReady();
+        if (hasPermanentlyDeniedPermission(missingPermissions)) {
+            openScanAfterPermissionGranted = false;
+            openAppInfoScreen();
+            return;
+        }
+        openScanAfterPermissionGranted = forScan;
+        ActivityCompat.requestPermissions(
+                this, missingPermissions, REQUEST_REQUIRED_PERMISSIONS);
     }
 
-    private String[] getMissingPairingPermissions() {
-        List<String> missing = new ArrayList<>();
+    private String[] getRequiredPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            addPermissionIfMissing(missing, Manifest.permission.BLUETOOTH_SCAN);
-            addPermissionIfMissing(missing, Manifest.permission.BLUETOOTH_CONNECT);
-        } else {
-            addPermissionIfMissing(missing, Manifest.permission.ACCESS_FINE_LOCATION);
+            return new String[]{
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT
+            };
+        }
+        return new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+    }
+
+    private String[] getMissingRequiredPermissions() {
+        List<String> missing = new ArrayList<>();
+        for (String permission : getRequiredPermissions()) {
+            if (!isPermissionGranted(permission)) {
+                missing.add(permission);
+            }
         }
         return missing.toArray(new String[0]);
     }
 
-    private void addPermissionIfMissing(List<String> missing, String permission) {
-        if (ContextCompat.checkSelfPermission(this, permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            missing.add(permission);
+    private boolean isPermissionGranted(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean hasPermanentlyDeniedPermission(String[] permissions) {
+        for (String permission : permissions) {
+            if (permissionPrefs.getBoolean(
+                    KEY_PERMANENTLY_DENIED_PREFIX + permission, false)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void clearGrantedPermanentDenials() {
+        for (String permission : getRequiredPermissions()) {
+            if (isPermissionGranted(permission)
+                    && permissionPrefs.getBoolean(
+                            KEY_PERMANENTLY_DENIED_PREFIX + permission, false)) {
+                permissionPrefs.edit()
+                        .putBoolean(KEY_PERMANENTLY_DENIED_PREFIX + permission, false)
+                        .apply();
+            }
+        }
+    }
+
+    private void setPermanentlyDenied(String permission, boolean denied) {
+        permissionPrefs.edit()
+                .putBoolean(KEY_PERMANENTLY_DENIED_PREFIX + permission, denied)
+                .apply();
+    }
+
+    private void openAppInfoScreen() {
+        Toast.makeText(this, R.string.permissions_required_settings, Toast.LENGTH_LONG).show();
+        try {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.fromParts("package", getPackageName(), null));
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to open app info settings", e);
         }
     }
 
@@ -235,13 +304,41 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != REQUEST_PAIRING_PERMISSIONS) {
+        if (requestCode != REQUEST_REQUIRED_PERMISSIONS) {
             return;
         }
-        if (getMissingPairingPermissions().length == 0) {
-            openScanDialogIfReady();
+
+        for (String permission : permissions) {
+            if (isPermissionGranted(permission)) {
+                setPermanentlyDenied(permission, false);
+            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                // The system will not show the request dialog again. The user must grant the
+                // permission from the App info screen.
+                setPermanentlyDenied(permission, true);
+            } else {
+                setPermanentlyDenied(permission, false);
+            }
+        }
+
+        if (btHelper != null) {
+            btHelper.ensureProfileProxies();
+        }
+
+        String[] missingPermissions = getMissingRequiredPermissions();
+        boolean openScan = openScanAfterPermissionGranted;
+        openScanAfterPermissionGranted = false;
+
+        if (missingPermissions.length == 0) {
+            if (openScan) {
+                openScanDialogIfReady();
+            } else {
+                updateStatus();
+                updateDeviceList();
+            }
+        } else if (hasPermanentlyDeniedPermission(missingPermissions)) {
+            openAppInfoScreen();
         } else {
-            Toast.makeText(this, R.string.scan_permission_denied, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.permissions_required, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -359,9 +456,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         if (!explicitIntent && !autoConnectPref) return;
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter == null || !adapter.isEnabled()) return;
+        if (adapter == null) return;
 
         try {
+            if (!adapter.isEnabled()) return;
             Set<BluetoothDevice> bonded = adapter.getBondedDevices();
             if (bonded == null || bonded.isEmpty()) return;
 
@@ -404,6 +502,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     @Override
     protected void onResume() {
         super.onResume();
+        clearGrantedPermanentDenials();
+        if (btHelper != null) {
+            btHelper.ensureProfileProxies();
+        }
         updateStatus();
         updateDeviceList();
         updateAutoConnectUI();
@@ -413,7 +515,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
 
     private void updateDeviceList() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null && adapter.isEnabled()) {
+        boolean adapterEnabled;
+        try {
+            adapterEnabled = adapter != null && adapter.isEnabled();
+        } catch (SecurityException e) {
+            deviceAdapter.setDevices(new ArrayList<>());
+            return;
+        }
+        if (adapterEnabled) {
             try {
                 Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
                 List<BluetoothDevice> deviceList = new ArrayList<>(pairedDevices);

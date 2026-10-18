@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -17,7 +17,7 @@ import java.util.Set;
 public class QuickConnectActivity extends AppCompatActivity {
 
     private static final String TAG = "QuickConnectActivity";
-    public static final String ACTION_QUICK_CONNECT = "com.saihgupr.btcontrol.ACTION_QUICK_CONNECT";
+    public static final String ACTION_QUICK_CONNECT = "com.esh.btcontrol.ACTION_QUICK_CONNECT";
     public static final String EXTRA_ADDRESS = "address";
     public static final String EXTRA_NAME = "name";
 

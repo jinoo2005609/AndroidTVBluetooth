@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;

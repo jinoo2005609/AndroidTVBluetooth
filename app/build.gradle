@@ -11,15 +11,15 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'com.saihgupr.btcontrol'
+    namespace 'com.esh.btcontrol'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.saihgupr.btcontrol"
+        applicationId "com.esh.btcontrol"
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName "1.3.0"
+        versionCode 4
+        versionName "1.4.0"
     }
 
     signingConfigs {

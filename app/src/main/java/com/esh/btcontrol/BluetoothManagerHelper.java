@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -25,6 +25,7 @@ public class BluetoothManagerHelper {
     
     // Lock to ensure we don't try to use profiles before they are ready
     private final Object mProfileLock = new Object();
+    private boolean mProfilesInitialized = false;
     
     private java.util.concurrent.CopyOnWriteArrayList<OnProfileProxyListener> mListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
@@ -68,9 +69,27 @@ public class BluetoothManagerHelper {
             Log.e(TAG, "Bluetooth not supported on this device");
             return;
         }
+        ensureProfileProxies();
+    }
+
+    /**
+     * Starts the A2DP, HFP, and HID profile proxies. This is a no-op until
+     * BLUETOOTH_CONNECT is granted, so it is safe to construct the helper before the
+     * runtime permission request completes. MainActivity calls it again after a grant.
+     */
+    public void ensureProfileProxies() {
+        if (mAdapter == null || !hasPermission()) {
+            return;
+        }
+        synchronized (mProfileLock) {
+            if (mProfilesInitialized) {
+                return;
+            }
+            mProfilesInitialized = true;
+        }
 
         // Get A2DP Profile
-        mAdapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+        mAdapter.getProfileProxy(mContext, new BluetoothProfile.ServiceListener() {
             @Override
             public void onServiceConnected(int profile, BluetoothProfile proxy) {
                 synchronized (mProfileLock) {
@@ -91,7 +110,7 @@ public class BluetoothManagerHelper {
         }, BluetoothProfile.A2DP);
 
         // Get Headset Profile (HFP)
-        mAdapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+        mAdapter.getProfileProxy(mContext, new BluetoothProfile.ServiceListener() {
             @Override
             public void onServiceConnected(int profile, BluetoothProfile proxy) {
                 synchronized (mProfileLock) {
@@ -111,7 +130,7 @@ public class BluetoothManagerHelper {
         }, BluetoothProfile.HEADSET);
 
         // Get Input Device Profile (HID) - API 28+ uses HID_DEVICE/HID_HOST but INPUT_DEVICE is standard
-        mAdapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+        mAdapter.getProfileProxy(mContext, new BluetoothProfile.ServiceListener() {
             @Override
             public void onServiceConnected(int profile, BluetoothProfile proxy) {
                 synchronized (mProfileLock) {

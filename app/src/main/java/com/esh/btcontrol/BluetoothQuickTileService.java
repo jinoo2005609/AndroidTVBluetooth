@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;

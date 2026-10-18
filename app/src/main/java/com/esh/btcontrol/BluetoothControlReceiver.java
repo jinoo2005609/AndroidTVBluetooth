@@ -1,4 +1,4 @@
-package com.saihgupr.btcontrol;
+package com.esh.btcontrol;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,8 +8,8 @@ import android.util.Log;
 public class BluetoothControlReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BtReceiver";
-    private static final String ACTION_CONNECT = "com.saihgupr.btcontrol.ACTION_CONNECT";
-    private static final String ACTION_DISCONNECT = "com.saihgupr.btcontrol.ACTION_DISCONNECT";
+    private static final String ACTION_CONNECT = "com.esh.btcontrol.ACTION_CONNECT";
+    private static final String ACTION_DISCONNECT = "com.esh.btcontrol.ACTION_DISCONNECT";
     private static final String EXTRA_ADDRESS = "address";
     private static final String EXTRA_NAME = "name";
     
