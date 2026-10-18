@@ -8,6 +8,7 @@ A lightweight utility for Android TV and Android phones that gives you a **1-cli
 
 - **1-Click Connect:** Simple UI to instantly toggle connections from your TV or Phone.
 - **Auto-Connect on Launch:** Automatically connect to your designated default or most recent Bluetooth device upon launching the app.
+- **Add & Pair Devices:** Scan for nearby Bluetooth devices and pair them directly from the app.
 - **Battery Percentage Display:** Real-time battery indicator on device cards with dynamic health status color coding.
 - **Safe Startup Volume:** Automatically set headphone media volume to a comfortable level (e.g. 30%, 40%, 50%) upon connection to protect your hearing.
 - **Remote Button Mapping (QuickConnect):** Map any button on your Shield/TV remote (via Button Mapper) directly to `QuickConnectActivity` to connect headphones in the background without opening the main UI.
@@ -22,6 +23,7 @@ A lightweight utility for Android TV and Android phones that gives you a **1-cli
 ### UI Method
 Simply launch the **AndroidTV Bluetooth Controller** app:
 - **Connect / Disconnect:** Click any paired device card.
+- **Add Device:** Click **Add Device** next to *Paired Devices*, put the target device in pairing mode, select it from the scan results, and confirm the system pairing prompt.
 - **Set as Default:** Long-click any device card to mark it as the default auto-connect device (indicated by a `★ DEFAULT` badge).
 - **Auto-Connect Toggle:** Use the left panel card to enable or disable automatic connection on startup.
 - **Safe Startup Volume:** Click the volume card on the left panel to cycle volume presets (`OFF`, `30%`, `40%`, `50%`, `60%`, `70%`, `80%`).
@@ -88,12 +90,16 @@ adb install -r path/to/AndroidTVBluetooth.apk
 **Option A: Via ADB**
 ```bash
 adb shell pm grant com.saihgupr.btcontrol android.permission.BLUETOOTH_CONNECT
+adb shell pm grant com.saihgupr.btcontrol android.permission.BLUETOOTH_SCAN
 ```
+*The scan permission only exists on Android 12+; skip it on older versions.*
 
 **Option B: Manual (On TV)**
 1. Go to your TV's **Settings > Apps > See all apps**.
 2. Find **AndroidTV Bluetooth Controller**.
 3. Select **Permissions** and ensure **Nearby Devices** (Bluetooth) is allowed.
+
+On Android 11 and below, the **Location** permission is also required to scan for devices; on Android 10–11, Location services must be enabled as well. The app prompts for these when **Add Device** is used.
 
 ### 3. Initialize
 Launch the **AndroidTVBluetooth** app manually on your TV **one time** to move it out of the system's "stopped" state. You can close it immediately after.
@@ -106,6 +112,19 @@ If you prefer to build it yourself:
 ./gradlew assembleDebug
 adb install -r app/build/outputs/apk/debug/AndroidTVBluetooth.apk
 ```
+
+For a signed release build, create a gitignored `keystore.properties` in the repository root:
+```properties
+storeFile=../cjw.keystore
+storePassword=your-store-password
+keyAlias=cjw
+keyPassword=your-key-password
+```
+Then run:
+```bash
+./gradlew assembleRelease
+```
+The APK is written to `app/build/outputs/apk/release/AndroidTVBluetooth.apk`.
 
 ## Troubleshooting
 

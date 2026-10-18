@@ -8,9 +8,19 @@
 
     <!-- Android 12+ Permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <!-- Classic discovery on Android 11 and below requires location -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <!-- Location is only needed for discovery on older Android; do not require the hardware -->
+    <uses-feature android:name="android.hardware.location" android:required="false" />
 
     <application
         android:allowBackup="true"

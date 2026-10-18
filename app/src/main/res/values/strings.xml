@@ -34,6 +34,30 @@
     <string name="quick_connect_no_device">No paired Bluetooth device found</string>
     <string name="quick_connect_already_connected">%1$s is already connected</string>
 
+    <!-- Add Device / Pairing -->
+    <string name="add_device">Add Device</string>
+    <string name="add_device_title">Add Bluetooth Device</string>
+    <string name="scan_status_searching">Searching for nearby devices…</string>
+    <string name="scan_status_searching_count">Searching for nearby devices… %1$d found</string>
+    <string name="scan_status_select">Select a device to pair</string>
+    <string name="scan_status_none">No discoverable devices found</string>
+    <string name="scan_empty_hint">Make sure the device is in pairing mode, then scan again.</string>
+    <string name="scan_status_bt_off">Bluetooth is off. Turn it on and scan again.</string>
+    <string name="scan_start_failed">Could not start Bluetooth scanning. Try again.</string>
+    <string name="scan_not_supported">Bluetooth is not supported on this device</string>
+    <string name="scan_permission_denied">Bluetooth scan and connect permissions are required</string>
+    <string name="scan_again">Scan Again</string>
+    <string name="cancel">Cancel</string>
+    <string name="scan_paired_tag">PAIRED</string>
+    <string name="scan_pairing_tag">PAIRING…</string>
+    <string name="scan_pairing_with">Pairing with %1$s…</string>
+    <string name="scan_pairing_success">%1$s paired successfully</string>
+    <string name="scan_pairing_failed">Pairing failed. Try again.</string>
+    <string name="scan_already_paired">%1$s is already paired</string>
+    <string name="scan_location_title">Location is required</string>
+    <string name="scan_location_message">Android requires Location services to be on before scanning for Bluetooth devices on this version of Android.</string>
+    <string name="open_settings">Open Settings</string>
+
     <!-- Safe Startup Volume -->
     <string name="startup_volume_title">Safe Headphone Volume</string>
     <string name="startup_volume_desc_enabled">Volume preset: %1$d%% on connect</string>

@@ -9,6 +9,9 @@ build/
 
 # User-specific configuration
 local.properties
+keystore.properties
+*.keystore
+*.jks
 
 # Captures
 captures/

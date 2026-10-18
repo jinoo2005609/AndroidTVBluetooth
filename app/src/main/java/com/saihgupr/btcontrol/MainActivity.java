@@ -1,5 +1,6 @@
 package com.saihgupr.btcontrol;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -7,22 +8,30 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +40,7 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements BluetoothManagerHelper.OnProfileProxyListener {
 
     private static final String TAG = "MainActivity";
+    private static final int REQUEST_PAIRING_PERMISSIONS = 2001;
     public static final String EXTRA_AUTO_CONNECT = "autoconnect";
     public static final String ACTION_BATTERY_LEVEL_CHANGED = "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED";
 
@@ -46,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
     private RecyclerView devicesRecycler;
     private DeviceAdapter deviceAdapter;
     private BluetoothManagerHelper btHelper;
+    private DeviceScanDialog scanDialog;
     private boolean hasAutoConnectedThisSession = false;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -58,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
             }
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action) ||
                 BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) ||
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action) ||
                 BluetoothAdapter.ACTION_STATE_CHANGED.equals(action) ||
                 ACTION_BATTERY_LEVEL_CHANGED.equals(action)) {
                 updateDeviceList();
@@ -107,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(ACTION_BATTERY_LEVEL_CHANGED);
         registerReceiver(mReceiver, filter);
@@ -116,6 +129,120 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
 
         setupAutoConnectCard();
         setupVolumeCard();
+        setupAddDeviceButton();
+    }
+
+    private void setupAddDeviceButton() {
+        MaterialButton addDeviceButton = findViewById(R.id.add_device_button);
+        if (addDeviceButton != null) {
+            addDeviceButton.setOnClickListener(v -> requestPairingPermissionsAndScan());
+        }
+    }
+
+    private void requestPairingPermissionsAndScan() {
+        String[] missingPermissions = getMissingPairingPermissions();
+        if (missingPermissions.length > 0) {
+            ActivityCompat.requestPermissions(
+                    this, missingPermissions, REQUEST_PAIRING_PERMISSIONS);
+            return;
+        }
+        openScanDialogIfReady();
+    }
+
+    private String[] getMissingPairingPermissions() {
+        List<String> missing = new ArrayList<>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            addPermissionIfMissing(missing, Manifest.permission.BLUETOOTH_SCAN);
+            addPermissionIfMissing(missing, Manifest.permission.BLUETOOTH_CONNECT);
+        } else {
+            addPermissionIfMissing(missing, Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        return missing.toArray(new String[0]);
+    }
+
+    private void addPermissionIfMissing(List<String> missing, String permission) {
+        if (ContextCompat.checkSelfPermission(this, permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            missing.add(permission);
+        }
+    }
+
+    private void openScanDialogIfReady() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            Toast.makeText(this, R.string.scan_not_supported, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            if (!adapter.isEnabled()) {
+                Toast.makeText(this, R.string.scan_status_bt_off, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (SecurityException e) {
+            Toast.makeText(this, R.string.scan_permission_denied, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                && !isLocationEnabled()) {
+            showLocationRequiredDialog();
+            return;
+        }
+
+        if (scanDialog != null && scanDialog.isShowing()) {
+            scanDialog.dismiss();
+        }
+        scanDialog = new DeviceScanDialog(this, device -> {
+            updateDeviceList();
+            updateStatus();
+        });
+        scanDialog.show();
+    }
+
+    private boolean isLocationEnabled() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            LocationManager locationManager =
+                    (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            try {
+                return locationManager != null && locationManager.isLocationEnabled();
+            } catch (SecurityException e) {
+                Log.w(TAG, "Unable to read location state", e);
+            }
+        }
+        return Settings.Secure.getInt(
+                getContentResolver(),
+                Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF) != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+    private void showLocationRequiredDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.scan_location_title)
+                .setMessage(R.string.scan_location_message)
+                .setPositiveButton(R.string.open_settings, (dialog, which) -> {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unable to open location settings", e);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != REQUEST_PAIRING_PERMISSIONS) {
+            return;
+        }
+        if (getMissingPairingPermissions().length == 0) {
+            openScanDialogIfReady();
+        } else {
+            Toast.makeText(this, R.string.scan_permission_denied, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setupAutoConnectCard() {
@@ -369,6 +496,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManagerH
 
     @Override
     protected void onDestroy() {
+        if (scanDialog != null) {
+            scanDialog.dismiss();
+            scanDialog = null;
+        }
         super.onDestroy();
         if (btHelper != null) {
             btHelper.removeProfileProxyListener(this);
