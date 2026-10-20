@@ -2,7 +2,7 @@
 
 ![screenshot](images/20260215101059.png)
 
-A lightweight utility for Android TV and Android phones that gives you a **1-click UI** to connect/disconnect Bluetooth devices, or complete **ADB automation** support.
+A lightweight utility for Android TV and Android phones that gives you a **1-click UI** to pair new devices, connect/disconnect Bluetooth devices, or complete **ADB automation** support.
 
 ## Features
 
@@ -74,7 +74,7 @@ adb shell am broadcast -a com.esh.btcontrol.ACTION_DISCONNECT \
 ## Installation
 
 ### 1. Download & Install APK
-Download the latest APK from the [Releases](https://github.com/saihgupr/AndroidTVBluetooth/releases) page.
+Download the latest APK from the [Releases](https://github.com/jinoo2005609/AndroidTVBluetooth/releases) page.
 
 **Option A: Via ADB (Fastest)**
 ```bash
@@ -139,4 +139,4 @@ This will print a list of paired devices if your specified name was not found.
 ---
 
 ## Support the Project
-This project is open-source and free. If you find it useful, consider giving it a star ⭐ or making a [donation](https://ko-fi.com/saihgupr) to support development.
+This project is open-source and free. If you find it useful, consider giving it a star ⭐ or making a [donation](https://esherloon.com/) to support development.
